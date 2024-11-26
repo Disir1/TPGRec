@@ -67,24 +67,25 @@ class Model(nn.Module):
         u_i_embedding = torch.stack(u_i_embeddings_list, dim=1)
         u_i_embedding = torch.mean(u_i_embedding, dim=1)
 
-        text_embedding, image_embedding = None, None
         u_embedding, i_embedding = torch.split(u_i_embedding, [self.n_users, self.n_items])
         layer_u_embedding0, layer_i_embedding0 = torch.split(u_i_embeddings_list[0], [self.n_users, self.n_items])
         layer_u_embedding1, layer_i_embedding1 = torch.split(u_i_embeddings_list[1], [self.n_users, self.n_items])
 
-        if items is None:
-            h = torch.zeros_like(i_embedding)
-            if self.use_text: h += self.text_trans(self.text_feat)
-            h = F.normalize(h, p=2, dim=-1)
-        else:
+        if items is not None:
+            # training
             h = torch.zeros_like(i_embedding[items])
             if self.use_text: h += self.text_trans(self.text_feat[items])
             h = F.normalize(h, p=2, dim=-1)
+        else:
+            # testing
+            h = torch.zeros_like(i_embedding)
+            if self.use_text: h += self.text_trans(self.text_feat)
+            h = F.normalize(h, p=2, dim=-1)
 
-        return u_embedding, i_embedding, h, text_embedding, layer_u_embedding0, \
+        return u_embedding, i_embedding, h, layer_u_embedding0, \
                layer_u_embedding1, layer_i_embedding0, layer_i_embedding1
 
-    def ssl_layer_loss0(self, side_embedding, fuse_embedding, idx=None):
+    def ssl_layer_loss(self, side_embedding, fuse_embedding, idx=None):
         current_side_emb = side_embedding
         current_fuse_emb = fuse_embedding
         norm_side_emb = F.normalize(current_side_emb)
@@ -117,7 +118,7 @@ class Model(nn.Module):
     def calculate_loss(self, interaction, gamma):
         user, pos_item, neg_item, neg_item2 = interaction
         all_items = torch.cat(interaction[1:], dim=-1)
-        user_all_id_embeddings, item_all_id_embeddings, h, text_embeddings, layer_u_embedding0, \
+        user_all_id_embeddings, item_all_id_embeddings, h, layer_u_embedding0, \
            layer_u_embedding1, layer_i_embedding0, layer_i_embedding1 = self.forward(self.train_u_i_graph, all_items)
 
         # CL_loss for fusion views and text views
@@ -127,36 +128,27 @@ class Model(nn.Module):
             u_embeddings1 = layer_u_embedding1[user]
             i_embeddings0 = layer_i_embedding0[pos_item]
             u_embeddings0 = layer_u_embedding0[user]
-            ssl_loss += self.ssl_layer_loss0(i_embeddings1, u_embeddings0)
-            ssl_loss += self.ssl_layer_loss0(u_embeddings1, i_embeddings0)
+            ssl_loss += self.ssl_layer_loss(i_embeddings1, u_embeddings0)
+            ssl_loss += self.ssl_layer_loss(u_embeddings1, i_embeddings0)
 
-        if self.Sem_CL:
+        if self.Sem_CL and self.use_text:
             idx = torch.arange(len(pos_item) * 2, len(pos_item) * 3).to(self.device)  # provide more chance for tail part
             i_embeddings = item_all_id_embeddings[all_items]
-            ssl_loss += self.ssl_layer_loss0(i_embeddings, h, idx)
+            ssl_loss += self.ssl_layer_loss(i_embeddings, h, idx)
 
         # calculate BPR Loss
         u_embeddings = user_all_id_embeddings[user]
         pos_embeddings = item_all_id_embeddings[pos_item]
         neg_embeddings = item_all_id_embeddings[neg_item]
+        neg_embeddings2 = item_all_id_embeddings[neg_item2]
         if self.use_text:
-            if len(h) == len(item_all_id_embeddings):
-                pos_embeddings += h[pos_item]
-                neg_embeddings += h[neg_item]
-            else:
-                pos_embeddings += h[:len(pos_item)]
-                neg_embeddings += h[len(pos_item):len(pos_item) + len(neg_item)]
+            pos_embeddings += h[:len(pos_item)]
+            neg_embeddings += h[len(pos_item):len(pos_item) + len(neg_item)]
+            neg_embeddings2 += h[len(pos_item) + len(neg_item):]
 
         pos_scores = torch.mul(u_embeddings, pos_embeddings).sum(dim=1)
         neg_scores = torch.mul(u_embeddings, neg_embeddings).sum(dim=1)
         weight = torch.mul(pos_embeddings, neg_embeddings).sum(dim=-1, keepdim=True)
-
-        neg_embeddings2 = item_all_id_embeddings[neg_item2]
-        if self.use_text:
-            if len(h) == len(item_all_id_embeddings):
-                neg_embeddings2 += h[neg_item2]
-            else:
-                neg_embeddings2 += h[len(pos_item) + len(neg_item):]
         neg_scores2 = torch.mul(u_embeddings, neg_embeddings2).sum(dim=-1)
         weight2 = torch.mul(pos_embeddings, neg_embeddings2).sum(dim=-1, keepdim=True)
 
