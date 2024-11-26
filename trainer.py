@@ -103,10 +103,10 @@ class Trainer(object):
                 indices = torch.cat([indices, indice], dim=0) if l > 0 else indice
                 l += self.test_batch_size
 
-        batch_result = map(self.rank_one_user, zip(indices, test_data, [self.topk] * max_uid, [i_degree] * max_uid))
+        all_result = map(self.rank_one_user, zip(indices, test_data, [self.topk] * max_uid, [i_degree] * max_uid))
         tail, head = copy.deepcopy(result), copy.deepcopy(result)
 
-        for one_user_result in batch_result:
+        for one_user_result in all_result:
             overall, head_batch, tail_batch = one_user_result
             for key in result.keys():
                 result[key] += overall[key] / max_uid

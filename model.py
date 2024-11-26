@@ -1,11 +1,9 @@
 import copy
-from torch.distributions import Bernoulli
 from torch import nn
 import torch
 import numpy as np
 import scipy.sparse as sp
 import torch.nn.functional as F
-from scipy.sparse import coo_matrix
 
 class Model(nn.Module):
     def __init__(self, n_users, n_items, text_feat, edge_p, user_nids, item_nids, args):
@@ -18,7 +16,6 @@ class Model(nn.Module):
         self.device = args.device
         self.ssl_reg = args.ssl_reg
         self.ssl_temp = args.ssl_temp
-        self.gamma1, self.gamma2= None, None
         self.edge_p = edge_p
         self.user_id_embedding = nn.Embedding(n_users, self.embedding_dim)
         self.item_id_embedding = nn.Embedding(n_items, self.embedding_dim)

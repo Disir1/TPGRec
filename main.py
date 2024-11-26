@@ -1,4 +1,3 @@
-import gc
 import torch
 from trainer import Trainer
 import dataloader
