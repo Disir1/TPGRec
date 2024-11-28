@@ -21,11 +21,11 @@ Train each dataset using its optimal configuration
 python main.py --dataset baby --ssl_temp 0.5 --edge_add_rate 0.2
 ```
 ```
-python main.py --dataset beauty --ssl_temp 0.3 --edge_add_rate 0.1
+python main.py --dataset beauty --ssl_temp 0.15 --edge_add_rate 0.1
 ```
 ```
-python main.py --dataset clothing --ssl_temp 0.3 --edge_add_rate 0.1
+python main.py --dataset clothing --ssl_temp 0.15 --edge_add_rate 0.1
 ```
 ```
-python main.py --dataset sports --ssl_temp 0.3 --edge_add_rate 0.1
+python main.py --dataset sports --ssl_temp 0.15 --edge_add_rate 0.1
 ```
