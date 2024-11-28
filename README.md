@@ -3,7 +3,7 @@
 ## About The Project
 Pytorch implementation for the paper "TPGRec: Text-Enhanced and Popularity-Smoothing Graph Collaborative Filtering for Long-Tail Item Recommendation"
 
-## Environment
+## Environments
 - python 3.9
 - torch==1.13.0+cu116
 - numpy==1.25.1
