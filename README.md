@@ -14,7 +14,7 @@ We conduct dataset preparation based on [MICRO](https://github.com/CRIPAC-DIG/MI
 - Download 5-core reviews data & meta data from [Amazon review data 2014](https://cseweb.ucsd.edu/~jmcauley/datasets/amazon/links.html)
 - Randomly split the dataset into 3 parts: train.json, valid.json & test.json
 - Install [sentence-transformers](https://www.sbert.net/docs/installation.html) and download a [pretrained model](https://www.sbert.net/docs/pretrained_models.html) to extra text-embedding of items
-- Processed data can be accessed at [Google Drive](https://drive.google.com/file/d/1u8U30EVcHVd3cP9kZpVWqfmJ8rYxQc0c/view?usp=drive_link)
+- Processed data can be downloaded from [Google Drive](https://drive.google.com/file/d/1u8U30EVcHVd3cP9kZpVWqfmJ8rYxQc0c/view?usp=drive_link)
 
 ## Run
 Train each dataset using its optimal configuration
