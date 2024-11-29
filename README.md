@@ -12,8 +12,8 @@ Pytorch implementation for the paper "TPGRec: Text-Enhanced and Popularity-Smoot
 ## Dataset
 We conduct dataset preparation based on [MICRO](https://github.com/CRIPAC-DIG/MICRO), following these steps:
 - Download 5-core reviews data & meta data from [Amazon review data 2014](https://cseweb.ucsd.edu/~jmcauley/datasets/amazon/links.html)
-- Randomly split the dataset into 3 parts: train.json, valid.json & test.json
 - Install [sentence-transformers](https://www.sbert.net/docs/installation.html) and download a [pretrained model](https://www.sbert.net/docs/pretrained_models.html) to extra text-embedding of items
+- Run ./data/build_data.py to create train/valid/test dataset & item_text_feat.npy.
 - Processed data can be downloaded from [Google Drive](https://drive.google.com/file/d/1u8U30EVcHVd3cP9kZpVWqfmJ8rYxQc0c/view?usp=drive_link)
 
 ## Run
