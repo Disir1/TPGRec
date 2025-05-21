@@ -96,15 +96,15 @@ class Model(nn.Module):
         rand_idx = torch.randperm(len(side_embedding)).to(self.device)
         norm_all_side_emb = norm_side_emb[rand_idx]
 
-        if idx is not None:
+        if idx is None:
             # Str_CL
-            norm_fuse_emb = norm_fuse_emb[idx]
-            norm_side_emb = norm_side_emb[idx]
             pos_score = torch.exp(torch.mul(norm_side_emb, norm_fuse_emb).sum(dim=1) / self.ssl_temp)
             ttl_score = (torch.exp(torch.matmul(norm_side_emb, norm_all_fuse_emb.transpose(0, 1)) / self.ssl_temp)).sum(
                 dim=-1)
         else:
             # Sem_CL
+            norm_fuse_emb = norm_fuse_emb[idx]
+            norm_side_emb = norm_side_emb[idx]
             pos_score = 2 * torch.exp(torch.mul(norm_side_emb, norm_fuse_emb).sum(dim=1) / self.ssl_temp)
             ttl_score = (torch.exp(torch.matmul(norm_side_emb, norm_all_fuse_emb.transpose(0, 1)) / self.ssl_temp)).sum(
                 dim=-1) \
